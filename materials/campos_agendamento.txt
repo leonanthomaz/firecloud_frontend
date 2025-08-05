@@ -1,0 +1,9 @@
+{
+  id?: string | number,         // opcional, mas bom pra editar/remover depois
+  title: string,                // o que será exibido no evento
+  start: string | Date,         // início do evento (ISO string ou Date)
+  end?: string | Date,          // fim do evento (opcional, mas bom p/ duração)
+  color?: string,               // cor do evento no calendário
+  allDay?: boolean,             // se ocupa o dia inteiro (true = sem hora)
+  extendedProps?: object        // dados extras que quiser guardar
+}

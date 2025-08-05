@@ -1,0 +1,33 @@
+
+*** INSTRUÇÕES DE PADRONIZAÇÃO DO PROJETO FIRECLOUD ***
+
+- Meu sistema é todo em Typescript com Material UI. 
+- Se precisar de um layout em grid, NÃO USE O ELEMENTO GRID DO MUI! O elemento Grid 
+está obsoleto e vai quebrar a aplicação no Typescript. Escolha sempre Stack ou Box.
+- Para notificações estantaneas, use "import { useSnackbar } from 'notistack';"
+- endpoints sempre vão estar em "src/services/api/arquivo" 
+- tipos sempre vão estar em "src/types/arquivo" 
+- se precisar de loading, use do contexto global (useGlobal) o isLoading e o setLoading
+- pode usar o Alert do MUI, MAS NUNCA USE EMBAIXO. Não faz sentido visualmente. Sempre ponha
+acima do elemento
+
+TEMPLATE BÁSICO - EXEMPLO:
+
+import { Box, Typography } from '@mui/material';
+import Layout from '../../../components/Layout';
+const TemplatePage = () => {
+    const { state, getToken } = useAuth()
+    const  token = getToken();
+    const company = state.data?.company
+    return (
+        <Layout withSidebar={true}>
+            <Box>
+                <Typography variant="h5" sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
+                    FireCloud Template
+                </Typography>      
+            </Box>
+        </Layout>
+    );
+};
+
+export default TemplatePage;
