@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { api } from '.';
-import { PaymentProcessData, PaymentQRCodeResponse, PaymentRequest, PaymentResponse, PaymentUpdate } from '../../types/payment';
+import { PaymentPixProcess, PaymentQRCodeResponse, PaymentRequest, PaymentResponse, PaymentUpdate } from '../../types/payment';
 
 /**
  * Lista todos os pagamentos
@@ -153,7 +153,7 @@ export const checkCompanyPendingPaymentApi = async (token: string, company_id: n
 
 export const generateQrCodeApi = async (
     token: string,
-    paymentData: PaymentProcessData
+    paymentData: PaymentPixProcess
 ): Promise<PaymentQRCodeResponse> => {
     try {
         const response: AxiosResponse<PaymentQRCodeResponse> = await api.post(

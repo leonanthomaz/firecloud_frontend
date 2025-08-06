@@ -88,7 +88,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chat, loading, typing, onSendMe
       <ChatWindowContainer ref={chatRef}>
         {loading && <Skeleton variant="rectangular" width="100%" height={50} />}
         {chat.map((msg, index) => (
-          <Message key={index} sender={msg.sender} service={msg.systemResponse} text={msg.text} />
+          <Message key={index} sender={msg.sender} data={msg.systemResponse} text={msg.text} />
         ))}
         {typing && (
           <TypingIndicator>
