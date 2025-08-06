@@ -15,8 +15,7 @@ import {
   Chip,
   CircularProgress,
 } from '@mui/material';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { Settings, AttachMoney, BarChart, Circle, TrendingUp, Chat, Receipt, OpenInNew as OpenInNewIcon } from '@mui/icons-material';
+import { Settings, AttachMoney, BarChart, Circle, SmartToy, TrendingUp, Chat, Receipt, OpenInNew as OpenInNewIcon } from '@mui/icons-material';
 import Layout from '../../../components/Layout';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getAssistantsApi } from '../../../services/api/assistant';
@@ -33,7 +32,6 @@ const DashboardPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    const [openHelp, setOpenHelp] = useState(false);
 
     const data = getUser();
     const token = getToken();
@@ -239,7 +237,13 @@ const DashboardPage: React.FC = () => {
                 icon: <BarChart />, 
                 href: '/painel/estatisticas',
                 color: 'info' 
-            }
+            },
+            { 
+                text: "Assistente", 
+                icon: <SmartToy />, 
+                href: '/painel/assistente',
+                color: 'secondary' 
+            },
         ];
 
         return (
@@ -309,16 +313,21 @@ const DashboardPage: React.FC = () => {
     return (
         <Layout withSidebar={true}>
             <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                {/* Cabeçalho Reorganizado */}
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: isSmallScreen ? 'column' : 'row', 
+                    justifyContent: 'space-between', 
+                    alignItems: isSmallScreen ? 'flex-start' : 'center',
+                    mt: 8, mb: 3,
+                }}>
                     <Box>
-                        {/* Cabeçalho */}
                         <Typography 
                             variant={isSmallScreen ? "h5" : "h4"} 
-                            gutterBottom
                             sx={{ 
                                 fontWeight: 'bold',
                                 color: 'primary.main',
-                                mt: 8
+                                lineHeight: 1.2
                             }}
                         >
                             Olá, {data?.user?.first_name || 'Usuário'}!
@@ -327,183 +336,191 @@ const DashboardPage: React.FC = () => {
                             variant="body1" 
                             sx={{ 
                                 color: 'text.secondary',
-                                maxWidth: '600px',
-                                mb: 2,
-                                fontSize: isSmallScreen ? '0.7rem' : '1rem'
+                                mt: 0.5,
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem'
                             }}
                         >
-                            Aqui está um resumo das atividades recentes e métricas importantes do seu chatbot.
+                            Aqui está um resumo das atividades do seu chatbot
                         </Typography>
                     </Box>
-                    <Box className="assistant-button">
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            startIcon={<OpenInNewIcon />}
-                            onClick={handleOpenAssistant}
-                            sx={{ alignSelf: 'flex-start' }}
-                        >
-                            {isSmallScreen ? 'Assistente' : 'Acessar Assistente'}
-                        </Button>
-                    </Box>
-                </Stack>
-                {/* Cards de Resumo */}
-                {renderSummaryCards()}
+                    
+                    <Button
+                        className="assistant-button"
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<OpenInNewIcon />}
+                        onClick={handleOpenAssistant}
+                        sx={{
+                            minWidth: isSmallScreen ? '100%' : 180,
+                            py: 1.5,
+                            fontSize: '0.875rem',
+                            ...(isSmallScreen && { mt: 1 })
+                        }}
+                    >
+                        Acessar Assistente
+                    </Button>
+                </Box>
 
-                {/* Links Rápidos */}
-                <Box className="quick-access-section">
+                {/* Seção de Resumo */}
+                <Box sx={{ mb: 4 }}>
+                    <Typography 
+                        variant="h6" 
+                        sx={{ 
+                            mb: 2,
+                            fontWeight: 'bold',
+                            color: 'text.primary',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                        }}
+                    >
+                        <TrendingUp fontSize="small" />
+                        Visão Geral
+                    </Typography>
+                    {renderSummaryCards()}
+                </Box>
+
+                {/* Seção de Acesso Rápido */}
+                <Box className="quick-access-section" sx={{ mb: 4 }}>
                     {renderQuickAccess()}
                 </Box>
 
-                {/* Gráfico de Interações */}
-                <Card className='interactions-chart' sx={{ 
-                    mb: 3,
-                    boxShadow: theme.shadows[1],
-                    borderRadius: 2
+                {/* Grid de Conteúdo Principal */}
+                <Box className='interactions-chart' sx={{ 
+                    display: 'grid',
+                    gridTemplateColumns: isSmallScreen ? '1fr' : '1fr 1fr',
+                    gap: 3,
                 }}>
-                    <CardContent>
-                        <Typography 
-                            variant="h6" 
-                            sx={{ 
-                                mb: 2, 
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1
-                            }}
-                        >
-                            <BarChart fontSize="small" />
-                            Interações Recentes
-                        </Typography>
-                        <Box sx={{ height: '300px' }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <RechartsBarChart data={chartData}>
-                                <XAxis dataKey="date" />
-                                <YAxis />
-                                <Tooltip />
-                                    <Legend />
-                                <Bar dataKey="interactions" fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} name="Tokens" />
-                                </RechartsBarChart>
-                            </ResponsiveContainer>
-                        </Box>
-                    </CardContent>
-                </Card>
-
-                {/* Atividades Recentes */}
-                <Card sx={{ 
-                    boxShadow: theme.shadows[1],
-                    borderRadius: 2
-                }}>
-                    <CardContent>
-                        <Typography 
-                            variant="h6" 
-                            sx={{ 
-                                mb: 2, 
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1
-                            }}
-                        >
-                            <Chat fontSize="small" />
-                            Últimas Interações
-                        </Typography>
-                        <List>
-                            {atividadesRecentes.map((atividade, index) => (
-                                <React.Fragment key={atividade.id || index}>
-                                    <ListItem 
-                                        sx={{ 
-                                            px: 0,
-                                            py: 2,
-                                            '&:hover': {
-                                                backgroundColor: 'action.hover'
-                                            }
-                                        }}
-                                    >
-                                        <ListItemText
-                                            primary={
-                                                <Typography 
-                                                    variant="body1"
-                                                    sx={{ fontWeight: 'medium' }}
-                                                >
-                                                    {atividade.descricao}
-                                                </Typography>
-                                            }
-                                            secondary={
-                                                <Stack 
-                                                    direction={isSmallScreen ? 'column' : 'row'} 
-                                                    spacing={isSmallScreen ? 0 : 2}
-                                                    sx={{ mt: 0.5 }}
-                                                >
-                                                    <Typography 
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        {atividade.tipo}
-                                                    </Typography>
-                                                    <Typography 
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        {atividade.data}
-                                                    </Typography>
-                                                    {atividade.sentiment && (
-                                                        <Chip 
-                                                            label={atividade.sentiment} 
-                                                            size="small" 
-                                                            sx={{ 
-                                                                ml: isSmallScreen ? 0 : 1,
-                                                                mt: isSmallScreen ? 0.5 : 0,
-                                                                backgroundColor: 
-                                                                    atividade.sentiment.toLowerCase() === 'positive' ? 'success.light' :
-                                                                    atividade.sentiment.toLowerCase() === 'negative' ? 'error.light' : 
-                                                                    'warning.light'
-                                                            }}
-                                                        />
-                                                    )}
-                                                </Stack>
-                                            }
+                    {/* Gráfico de Interações */}
+                    <Card sx={{ 
+                        boxShadow: theme.shadows[1],
+                        borderRadius: 2,
+                        height: '100%',
+                        gridColumn: isSmallScreen ? '1 / -1' : 'span 1'
+                    }}>
+                        <CardContent>
+                            <Typography 
+                                variant="h6" 
+                                sx={{ 
+                                    mb: 2, 
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1
+                                }}
+                            >
+                                <BarChart fontSize="small" />
+                                Interações Recentes
+                            </Typography>
+                            <Box sx={{ height: 300 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RechartsBarChart data={chartData}>
+                                        <XAxis dataKey="date" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Bar 
+                                            dataKey="interactions" 
+                                            fill={theme.palette.primary.main} 
+                                            radius={[4, 4, 0, 0]} 
+                                            name="Interações" 
                                         />
-                                    </ListItem>
-                                    {index < atividadesRecentes.length - 1 && (
-                                        <Divider sx={{ my: 0 }} />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </List>
-                    </CardContent>
-                </Card>
+                                    </RechartsBarChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </CardContent>
+                    </Card>
 
-                <Dialog open={openHelp} onClose={() => setOpenHelp(false)} maxWidth="sm" fullWidth>
-                    <DialogTitle sx={{ fontWeight: 'bold' }}>Como marcar seus dias disponíveis</DialogTitle>
-                    <DialogContent dividers>
-                        <Typography gutterBottom>
-                            🗓️ <strong>Passo 1:</strong> Escolha um dia no calendário clicando diretamente na data desejada.
-                        </Typography>
-                        <Typography gutterBottom>
-                            ⏰ <strong>Passo 2:</strong> Defina o horário de início e término em que estará disponível nesse dia.
-                        </Typography>
-                        <Typography gutterBottom>
-                            📝 <strong>Passo 3:</strong> Se necessário, marque se o horário será <strong>recorrente</strong> ou apenas para o dia escolhido.
-                        </Typography>
-                        <Typography gutterBottom>
-                            ✅ <strong>Passo 4:</strong> Salve para que os clientes possam visualizar esses horários disponíveis.
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" mt={2}>
-                            Dica: você pode <strong>arrastar e soltar</strong> os horários já marcados para ajustá-los.
-                        </Typography>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button 
-                            onClick={() => setOpenHelp(false)} 
-                            variant="contained" 
-                            color="primary"
-                            sx={{ borderRadius: '8px' }}
-                        >
-                            Entendi
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                    {/* Atividades Recentes */}
+                    <Card sx={{ 
+                        boxShadow: theme.shadows[1],
+                        borderRadius: 2,
+                        height: '100%',
+                        gridColumn: isSmallScreen ? '1 / -1' : 'span 1'
+                    }}>
+                        <CardContent>
+                            <Typography 
+                                variant="h6" 
+                                sx={{ 
+                                    mb: 2, 
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1
+                                }}
+                            >
+                                <Chat fontSize="small" />
+                                Últimas Interações
+                            </Typography>
+                            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+                                {atividadesRecentes.map((atividade, index) => (
+                                    <React.Fragment key={atividade.id || index}>
+                                        <ListItem 
+                                            sx={{ 
+                                                px: 0,
+                                                py: 1.5,
+                                                '&:hover': {
+                                                    backgroundColor: 'action.hover'
+                                                }
+                                            }}
+                                        >
+                                            <ListItemText
+                                                primary={
+                                                    <Typography 
+                                                        variant="body2"
+                                                        sx={{ fontWeight: 'medium' }}
+                                                    >
+                                                        {atividade.descricao}
+                                                    </Typography>
+                                                }
+                                                secondary={
+                                                    <Stack 
+                                                        direction={isSmallScreen ? 'column' : 'row'} 
+                                                        spacing={isSmallScreen ? 0 : 2}
+                                                        sx={{ mt: 0.5 }}
+                                                        divider={
+                                                            !isSmallScreen ? (
+                                                                <Circle sx={{ fontSize: 4, color: 'divider' }} />
+                                                            ) : null
+                                                        }
+                                                    >
+                                                        <Typography 
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            {atividade.tipo}
+                                                        </Typography>
+                                                        <Typography 
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            {atividade.data}
+                                                        </Typography>
+                                                        {atividade.sentiment && (
+                                                            <Chip 
+                                                                label={atividade.sentiment} 
+                                                                size="small" 
+                                                                sx={{ 
+                                                                    backgroundColor: 
+                                                                        atividade.sentiment.toLowerCase() === 'positive' ? 'success.light' :
+                                                                        atividade.sentiment.toLowerCase() === 'negative' ? 'error.light' : 
+                                                                        'warning.light'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </Stack>
+                                                }
+                                            />
+                                        </ListItem>
+                                        {index < atividadesRecentes.length - 1 && (
+                                            <Divider sx={{ my: 0 }} component="li" />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </CardContent>
+                    </Card>
+                </Box>
             </Box>
         </Layout>
     );

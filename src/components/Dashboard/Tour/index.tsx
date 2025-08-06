@@ -7,14 +7,19 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 const useTourSteps = (): Step[] => [
   {
-    target: ".chatbot-status-card",
-    content: "Acompanhe aqui o status do seu chatbot e informações básicas",
-    placement: "bottom",
+    target: ".user-avatar",
+    content: "Aqui você pode alterar sua foto de perfil e logo da empresa",
+    placement: "right",
     disableBeacon: true,
   },
   {
     target: ".assistant-button",
     content: "Clique aqui para acessar diretamente seu assistente virtual",
+    placement: "bottom",
+  },
+  {
+    target: ".chatbot-status-card",
+    content: "Acompanhe aqui o status do seu chatbot e informações básicas",
     placement: "bottom",
   },
   {
@@ -27,11 +32,7 @@ const useTourSteps = (): Step[] => [
     content: "Visualize o histórico de interações com seus clientes",
     placement: "top",
   },
-  {
-    target: ".user-avatar",
-    content: "Aqui você pode alterar sua foto de perfil e logo da empresa",
-    placement: "right",
-  },
+  
 ];
 
 export default function Tour() {
@@ -93,6 +94,7 @@ export default function Tour() {
       showProgress
       showSkipButton
       scrollToFirstStep
+      scrollOffset={80}
       spotlightClicks
       spotlightPadding={10}
       disableOverlayClose
