@@ -30,7 +30,8 @@ import { useSnackbar } from 'notistack';
 import { getAssistantByCompany, updateAssistantApi } from '../../../services/api/assistant';
 import { useCompany } from '../../../contexts/CompanyContext';
 import { useGlobal } from '../../../contexts/GlobalContext';
-import { FireCreditSection } from './TokenUsage';
+import { TokenUsageSection } from './TokenUsage';
+// import { FireCreditSection } from './TokenUsage';
 
 // Tipos de assistente disponíveis
 const ASSISTANT_TYPES = [
@@ -191,7 +192,8 @@ const AssistantPage: React.FC = () => {
           Personalize o comportamento e as configurações da sua assistente virtual.
         </Typography>
 
-        <FireCreditSection assistant={assistant} />
+        {/* <FireCreditSection assistant={assistant} /> */}
+        <TokenUsageSection assistant={assistant} />
 
         {/* Seção Status e Link */}
         <Card sx={{ mb: 3 }}>

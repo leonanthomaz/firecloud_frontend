@@ -16,7 +16,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { Settings, AttachMoney, BarChart, Circle, TrendingUp, Chat, Receipt } from '@mui/icons-material';
+import { Settings, AttachMoney, BarChart, Circle, TrendingUp, Chat, Receipt, OpenInNew as OpenInNewIcon } from '@mui/icons-material';
 import Layout from '../../../components/Layout';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getAssistantsApi } from '../../../services/api/assistant';
@@ -336,7 +336,15 @@ const DashboardPage: React.FC = () => {
                         </Typography>
                     </Box>
                     <Box className="assistant-button">
-                        <Button variant="contained"  size='small' onClick={handleOpenAssistant}>{isSmallScreen ? 'Assistente' : 'Ir para assistente'}</Button>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            startIcon={<OpenInNewIcon />}
+                            onClick={handleOpenAssistant}
+                            sx={{ alignSelf: 'flex-start' }}
+                        >
+                            {isSmallScreen ? 'Assistente' : 'Acessar Assistente'}
+                        </Button>
                     </Box>
                 </Stack>
                 {/* Cards de Resumo */}

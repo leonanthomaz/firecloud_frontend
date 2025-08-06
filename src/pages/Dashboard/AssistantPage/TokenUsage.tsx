@@ -1,44 +1,59 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, Stack, CircularProgress } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  CardContent, 
+  Stack, 
+  CircularProgress,
+  Button,
+  useTheme,
+  LinearProgress,
+  Tooltip,
+  Alert
+} from '@mui/material';
 import { AssistantInfo } from '../../../types/assistant';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
 
-const TOKENS_PER_FIRECREDIT = 1000;
-
-const calculateFireCredits = (usedTokens: number, limitTokens: number) => {
-  const creditsUsed = Math.ceil((usedTokens / TOKENS_PER_FIRECREDIT) * 10) / 10;
-  const totalCredits = Math.floor(limitTokens / TOKENS_PER_FIRECREDIT * 10) / 10;
-  const creditsRemaining = Math.max(0, Math.floor((totalCredits - creditsUsed) * 10) / 10);
-  const percentage = totalCredits > 0 ? Math.min(Math.round((creditsUsed / totalCredits) * 100), 100) : 0;
-
-  return { creditsUsed, creditsRemaining, totalCredits, percentage };
-};
-
-interface FireCreditCircleProps {
-  usage: number;
-  limit: number;
+interface TokenUsageCircleProps {
+  percentage: number;
   size?: number;
   thickness?: number;
 }
 
-const FireCreditCircle: React.FC<FireCreditCircleProps> = ({
-  usage,
-  limit,
-  size = 120,
-  thickness = 8,
+const TokenUsageCircle: React.FC<TokenUsageCircleProps> = ({ 
+  percentage,
+  size = 160, 
+  thickness = 10
 }) => {
-  const { percentage } = calculateFireCredits(usage, limit);
+  const theme = useTheme();
+  
+  // Define a cor com base na porcentagem
+  const getColor = () => {
+    if (percentage > 90) return theme.palette.error.main;
+    if (percentage > 70) return theme.palette.warning.main;
+    return theme.palette.primary.main;
+  };
+
+  // Define o ícone de alerta
+  const getAlertIcon = () => {
+    if (percentage > 90) return <ErrorIcon color="error" sx={{ fontSize: 40 }} />;
+    if (percentage > 70) return <WarningIcon color="warning" sx={{ fontSize: 40 }} />;
+    return <InfoIcon color="info" sx={{ fontSize: 40 }} />;
+  };
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        width: size,
-        height: size,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <Box sx={{ 
+      position: 'relative',
+      width: size,
+      height: size,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      {/* Círculo de fundo */}
       <CircularProgress
         variant="determinate"
         value={100}
@@ -46,10 +61,11 @@ const FireCreditCircle: React.FC<FireCreditCircleProps> = ({
         thickness={thickness}
         sx={{
           position: 'absolute',
-          color: (theme) => theme.palette.grey[300],
+          color: theme.palette.grey[200],
         }}
       />
-
+      
+      {/* Círculo de progresso */}
       <CircularProgress
         variant="determinate"
         value={percentage}
@@ -57,61 +73,135 @@ const FireCreditCircle: React.FC<FireCreditCircleProps> = ({
         thickness={thickness}
         sx={{
           position: 'absolute',
-          color: (theme) =>
-            percentage > 90
-              ? theme.palette.error.main
-              : percentage > 70
-              ? theme.palette.warning.main
-              : theme.palette.primary.main,
+          color: getColor(),
           transform: 'rotate(90deg)',
         }}
       />
-
-      <Box sx={{ textAlign: 'center' }}>
-        <Typography variant="h6" fontWeight="bold">
+      
+      {/* Conteúdo central */}
+      <Box sx={{ 
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        {percentage > 70 && (
+          <Box sx={{ mb: 1 }}>
+            {getAlertIcon()}
+          </Box>
+        )}
+        <Typography variant="h4" fontWeight="bold">
           {percentage}%
         </Typography>
-        <Typography variant="caption" display="block">
-          FireCréditos usados
+        <Typography variant="body2" color="text.secondary">
+          Limite
         </Typography>
       </Box>
     </Box>
   );
 };
 
-export const FireCreditSection = ({ assistant }: { assistant: AssistantInfo }) => {
-  const used = assistant.assistant_token_usage || 0;
+export const TokenUsageSection = ({ assistant }: { assistant: AssistantInfo }) => {
+  const theme = useTheme();
+  const usage = assistant.assistant_token_usage || 0;
   const limit = assistant.assistant_token_limit || 1;
-  const resetDate = assistant.assistant_token_reset_date;
+  const percentage = Math.min(Math.round((usage / limit) * 100), 100);
+  const remaining = limit - usage;
+  const resetDate = assistant.assistant_token_reset_date 
+    ? new Date(assistant.assistant_token_reset_date) 
+    : null;
 
-  const { creditsUsed, creditsRemaining, totalCredits } = calculateFireCredits(used, limit);
+  // Verifica se está crítico (últimos 10%)
+  const isCritical = percentage > 90;
+  const isWarning = percentage > 70 && !isCritical;
 
   return (
-    <Card sx={{ mb: 3 }}>
+    <Card sx={{ mb: 3, border: isCritical ? `2px solid ${theme.palette.error.main}` : 'none' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          FireCréditos
-        </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center">
-          <FireCreditCircle usage={used} limit={limit} />
-
-          <Box>
-            <Stack spacing={1}>
-              <Typography variant="body1">
-                <strong>{creditsUsed}</strong> usados
-              </Typography>
-              <Typography variant="body1">
-                <strong>{creditsRemaining}</strong> restantes
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Total: {totalCredits} FireCréditos
-              </Typography>
-              {resetDate && (
-                <Typography variant="body2" color="text.secondary">
-                  Próximo reset: {new Date(resetDate).toLocaleDateString()}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="center">
+          {/* Círculo de porcentagem */}
+          <TokenUsageCircle percentage={percentage} />
+          
+          {/* Detalhes de uso */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Uso de Tokens
+            </Typography>
+            
+            {isCritical && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                Seu limite de tokens está quase esgotado! Atualize seu plano para continuar usando.
+              </Alert>
+            )}
+            
+            {isWarning && (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Seu uso de tokens está alto. Considere atualizar seu plano.
+              </Alert>
+            )}
+            
+            {/* Barra de progresso linear */}
+            <Box sx={{ mb: 2 }}>
+              <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+                <Typography variant="body2">
+                  {usage.toLocaleString()} tokens usados
                 </Typography>
-              )}
+                <Typography variant="body2">
+                  {remaining.toLocaleString()} restantes
+                </Typography>
+              </Stack>
+              <LinearProgress 
+                variant="determinate" 
+                value={percentage} 
+                color={
+                  percentage > 90 ? 'error' :
+                  percentage > 70 ? 'warning' :
+                  'primary'
+                }
+                sx={{ height: 10, borderRadius: 5 }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                Limite total: {limit.toLocaleString()} tokens
+              </Typography>
+            </Box>
+            
+            {/* Informações adicionais */}
+            <Stack direction="row" spacing={4}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Próximo reset
+                </Typography>
+                <Typography variant="body1" fontWeight="medium">
+                  {resetDate ? resetDate.toLocaleDateString() : 'Não definido'}
+                </Typography>
+              </Box>
+              
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Modelo
+                </Typography>
+                <Typography variant="body1" fontWeight="medium">
+                  {assistant.assistant_model || 'Não especificado'}
+                </Typography>
+              </Box>
             </Stack>
+          </Box>
+          
+          {/* Botão de ação */}
+          <Box>
+            <Tooltip title={isCritical ? "Você precisa adquirir mais tokens" : "Adquira mais tokens para aumentar seu limite"} arrow>
+              <span>
+                <Button 
+                  variant="contained" 
+                  color={isCritical ? 'error' : isWarning ? 'warning' : 'primary'}
+                  size="large"
+                  sx={{ minWidth: 180 }}
+                  disabled={percentage < 70}
+                >
+                  {isCritical ? 'Comprar Tokens' : 'Adicionar Tokens'}
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </Stack>
       </CardContent>
