@@ -52,6 +52,15 @@ export interface CompanyRequest {
     addresses: Address[];
 }
 
+export type CompanyStatusUpdate = {
+  new_status: CompanyStatus;
+};
+
+export type CompanyStatusResponse = {
+  current_status: CompanyStatus;
+  message?: string;
+};
+
 export interface CompanyUpdate extends Partial<CompanyRequest> {}
 
 export enum CompanyStatus {
@@ -66,4 +75,5 @@ export enum CompanyStatus {
 export enum CompanyOpen {
   OPEN = "OPEN",
   CLOSE = "CLOSE",
+  MAINTENANCE = "MAINTENANCE"
 }

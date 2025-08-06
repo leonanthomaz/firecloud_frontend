@@ -38,6 +38,8 @@ const ScheduleSlotsPage = () => {
     const [openHelp, setOpenHelp] = useState(false);
     const [services, setServices] = useState<ServiceResponse[]>([]);
 
+    
+
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -249,7 +251,7 @@ const ScheduleSlotsPage = () => {
             <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Box>
-                        <Typography variant="h5" sx={{ mt: 8, color: 'primary.main', fontWeight: 'bold' }}>
+                        <Typography variant={isMobile ? "h5" : "h4"}  sx={{ mt: 8, color: 'primary.main', fontWeight: 'bold' }}>
                             Meus Horários Disponíveis
                         </Typography>
                         <Typography variant="body1" color="text.secondary" mb={4}>

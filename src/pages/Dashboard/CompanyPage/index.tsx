@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Layout from '../../../components/Layout';
 import { useAuth } from '../../../contexts/AuthContext';
 import SettingsForm from './CompanyForm';
@@ -13,6 +13,8 @@ const CompanyPage: React.FC = () => {
     const user = getUser();
     const { enqueueSnackbar } = useSnackbar();
     const { updateCompany, updateCompanyData, syncWithAuthData } = useCompany();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const initializeCompanyState = (): CompanyInfo => {
         const defaultCompanyInfo: CompanyInfo = {
@@ -75,7 +77,7 @@ const CompanyPage: React.FC = () => {
     return (
         <Layout withSidebar={true}>
             <Box>
-                 <Typography variant="h5" sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
+                 <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
                     Dados da sua Empresa
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3 }}>

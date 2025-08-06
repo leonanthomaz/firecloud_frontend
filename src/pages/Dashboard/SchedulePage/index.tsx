@@ -30,6 +30,8 @@ const SchedulePage = () => {
     const [services, setServices] = useState<ServiceResponse[]>([]);
     const [openHelp, setOpenHelp] = useState(false);
 
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -293,7 +295,7 @@ const SchedulePage = () => {
             <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Box>
-                        <Typography variant="h5" sx={{ mt: 8, color: 'primary.main', fontWeight: 'bold' }}>
+                        <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, color: 'primary.main', fontWeight: 'bold' }}>
                             Agendamentos
                         </Typography>
                         <Typography variant="body1" color="text.secondary" mb={4}>

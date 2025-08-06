@@ -73,3 +73,26 @@ export const deleteAssistantApi = async (token: string, companyId: number, assis
         throw error;
     }
 };
+
+export const updateAssistantStatusApi = async (
+    token: string,
+    companyId: number,
+    assistantId: number,
+    status: 'ONLINE' | 'OFFLINE'
+): Promise<AssistantInfo> => {
+    try {
+        const response: AxiosResponse<AssistantInfo> = await api.patch(
+            `/assistants/${companyId}/${assistantId}/status`,
+            { status },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao atualizar status da assistente:', error);
+        throw error;
+    }
+};

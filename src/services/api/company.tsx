@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { api } from '.';
-import { CompanyInfo, CompanyUpdate } from '../../types/company';
+import { CompanyInfo, CompanyOpen, CompanyStatus, CompanyStatusResponse, CompanyStatusUpdate, CompanyUpdate } from '../../types/company';
 
 // EMPRESAS
 export const getCompanyForChatApi = async (code: string): Promise<CompanyInfo> => {
@@ -104,4 +104,28 @@ export const changeTutorialCompanyApi = async (
     throw error;
   }
 };
+
+export const changeCompanyStatusApi = async (
+  token: string,
+  status: CompanyOpen
+): Promise<CompanyStatusResponse> => {
+  try {
+    const payload = { new_status: status };
+    const response = await api.post(
+      'company/status',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar status da empresa:', error);
+    throw error;
+  }
+};
+
+
 

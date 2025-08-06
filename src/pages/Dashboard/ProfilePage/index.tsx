@@ -9,7 +9,9 @@ import {
   InputAdornment,
   IconButton,
   Alert,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { Visibility, VisibilityOff, Person, Lock, AlternateEmail } from '@mui/icons-material';
 import Layout from '../../../components/Layout';
@@ -26,6 +28,8 @@ const ProfilePage: React.FC = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const currentUser = state.data?.user
   const token = getToken()
@@ -126,7 +130,7 @@ const ProfilePage: React.FC = () => {
   return (
     <Layout withSidebar={true}>
       <Box>
-        <Typography variant="h5" sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
+        <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
           Meu Perfil
         </Typography>
 

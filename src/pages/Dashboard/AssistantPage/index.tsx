@@ -16,7 +16,9 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -27,7 +29,7 @@ import Layout from '../../../components/Layout';
 import { AssistantInfo } from '../../../types/assistant';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSnackbar } from 'notistack';
-import { getAssistantByCompany, updateAssistantApi } from '../../../services/api/assistant';
+import { getAssistantByCompany, updateAssistantApi, updateAssistantStatusApi } from '../../../services/api/assistant';
 import { useCompany } from '../../../contexts/CompanyContext';
 import { useGlobal } from '../../../contexts/GlobalContext';
 import { TokenUsageSection } from './TokenUsage';
@@ -57,6 +59,8 @@ const AssistantPage: React.FC = () => {
     status: 'active'
   });
   const [saving, setSaving] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const token = getToken();
   const company = currentCompany || state.data?.company;
@@ -159,6 +163,8 @@ const AssistantPage: React.FC = () => {
     }
   };
 
+  
+
   if (isLoading) {
     return (
       <Layout withSidebar={true}>
@@ -173,7 +179,7 @@ const AssistantPage: React.FC = () => {
     return (
       <Layout withSidebar={true}>
         <Box>
-          <Typography variant="h5" sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
+          <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
             Assistente
           </Typography>
           <Typography>Nenhuma assistente configurada para esta empresa.</Typography>
@@ -185,12 +191,39 @@ const AssistantPage: React.FC = () => {
   return (
     <Layout withSidebar={true}>
       <Box>
-        <Typography variant="h5" sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
-          Configurações da Assistente
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Personalize o comportamento e as configurações da sua assistente virtual.
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
+              Configurações da Assistente
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              Personalize o comportamento e as configurações da sua assistente virtual.
+            </Typography>
+          </Box>
+          <Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={assistant?.status === 'ONLINE'}
+                  onChange={async (e) => {
+                    const newStatus = e.target.checked ? 'ONLINE' : 'OFFLINE';
+                    if (!token || !company?.id || !assistant?.id) return;
+
+                    try {
+                      const updated = await updateAssistantStatusApi(token, company.id, assistant.id, newStatus);
+                      setAssistant(updated);
+                      enqueueSnackbar(`Assistente ${newStatus === 'ONLINE' ? 'ativada' : 'desativada'} com sucesso!`, { variant: 'success' });
+                    } catch (error) {
+                      enqueueSnackbar('Erro ao alterar status da assistente.', { variant: 'error' });
+                    }
+                  }}
+                  color="primary"
+                />
+              }
+              label={assistant?.status === 'ONLINE' ? 'Online' : 'Offline'}
+            />
+          </Box>
+        </Stack>
 
         {/* <FireCreditSection assistant={assistant} /> */}
         <TokenUsageSection assistant={assistant} />
