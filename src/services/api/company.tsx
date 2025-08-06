@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { api } from '.';
-import { CompanyInfo, CompanyOpen, CompanyStatus, CompanyStatusResponse, CompanyStatusUpdate, CompanyUpdate } from '../../types/company';
+import { CompanyInfo, CompanyOpen, CompanyStatusResponse, CompanyUpdate } from '../../types/company';
 
 // EMPRESAS
 export const getCompanyForChatApi = async (code: string): Promise<CompanyInfo> => {

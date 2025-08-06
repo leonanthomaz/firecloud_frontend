@@ -163,8 +163,6 @@ const AssistantPage: React.FC = () => {
     }
   };
 
-  
-
   if (isLoading) {
     return (
       <Layout withSidebar={true}>
