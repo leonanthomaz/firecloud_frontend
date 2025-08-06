@@ -18,8 +18,8 @@ const Home: React.FC = () => {
     <HeroSection />
     <Layout withWhatsApp={true}>
       <ServicesComponent />
-      <HowItWorksPage />
       <PricingPage />
+      <HowItWorksPage />
       <FaqPage/>
       <QuickContactForm/>
     </Layout>
