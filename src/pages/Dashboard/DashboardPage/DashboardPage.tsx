@@ -23,7 +23,6 @@ import { getPaymentsByCompanyApi } from '../../../services/api/payment';
 import { getInteractionsByCompany } from '../../../services/api/interaction';
 import { ChatbotStatus } from '../../../types/assistant';
 import { ResponsiveContainer, Bar, XAxis, YAxis, Tooltip, BarChart as RechartsBarChart, Legend } from 'recharts';
-import { SentimentType } from '../../../types/sentiment';
 
 const DashboardPage: React.FC = () => {
     const { getUser, getToken } = useAuth();
