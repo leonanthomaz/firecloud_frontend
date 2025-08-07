@@ -23,6 +23,7 @@ import { getPaymentsByCompanyApi } from '../../../services/api/payment';
 import { getInteractionsByCompany } from '../../../services/api/interaction';
 import { ChatbotStatus } from '../../../types/assistant';
 import { ResponsiveContainer, Bar, XAxis, YAxis, Tooltip, BarChart as RechartsBarChart, Legend } from 'recharts';
+import { SentimentType } from '../../../types/sentiment';
 
 const DashboardPage: React.FC = () => {
     const { getUser, getToken } = useAuth();
@@ -300,6 +301,26 @@ const DashboardPage: React.FC = () => {
         }
     };
 
+    // tradução separada
+    const SentimentLabels = {
+        POSITIVE: 'Positivo',
+        NEGATIVE: 'Negativo',
+        NEUTRAL: 'Neutro',
+    } as const;
+
+    // função cor que você já tem
+    const getSentimentColor = (sentiment: string): string => {
+        switch (sentiment.toUpperCase()) {
+            case 'POSITIVE':
+            return 'success.light';
+            case 'NEGATIVE':
+            return 'error.light';
+            default:
+            return 'warning.light';
+        }
+    };
+
+
     if (loading) {
         return (
         <Layout>
@@ -497,17 +518,14 @@ const DashboardPage: React.FC = () => {
                                                             {atividade.data}
                                                         </Typography>
                                                         {atividade.sentiment && (
-                                                            <Chip 
-                                                                label={atividade.sentiment} 
-                                                                size="small" 
-                                                                sx={{ 
-                                                                    backgroundColor: 
-                                                                        atividade.sentiment.toLowerCase() === 'positive' ? 'success.light' :
-                                                                        atividade.sentiment.toLowerCase() === 'negative' ? 'error.light' : 
-                                                                        'warning.light'
-                                                                }}
+                                                            <Chip
+                                                                label={SentimentLabels[atividade.sentiment.toUpperCase() as keyof typeof SentimentLabels] || atividade.sentiment}
+                                                                size="small"
+                                                                sx={{ backgroundColor: getSentimentColor(atividade.sentiment) }}
                                                             />
                                                         )}
+
+
                                                     </Stack>
                                                 }
                                             />

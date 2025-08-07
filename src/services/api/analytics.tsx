@@ -29,7 +29,7 @@ export const getReportApi = async (token: string, companyId: number) => {
       headers: { Authorization: `Bearer ${token}` },
       responseType: 'blob', // ESSENCIAL AQUI
     });
-    return response.data; // isso agora é um Blob
+    return response;
   } catch (error) {
     throw error;
   }

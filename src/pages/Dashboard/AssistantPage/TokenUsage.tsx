@@ -25,8 +25,8 @@ interface TokenUsageCircleProps {
 
 const TokenUsageCircle: React.FC<TokenUsageCircleProps> = ({ 
   percentage,
-  size = 160, 
-  thickness = 10
+  size = 180, 
+  thickness = 7
 }) => {
   const theme = useTheme();
   
@@ -39,9 +39,9 @@ const TokenUsageCircle: React.FC<TokenUsageCircleProps> = ({
 
   // Define o ícone de alerta
   const getAlertIcon = () => {
-    if (percentage > 90) return <ErrorIcon color="error" sx={{ fontSize: 40 }} />;
-    if (percentage > 70) return <WarningIcon color="warning" sx={{ fontSize: 40 }} />;
-    return <InfoIcon color="info" sx={{ fontSize: 40 }} />;
+    if (percentage > 90) return <ErrorIcon color="error" sx={{ fontSize: '1.5rem' }} />;
+    if (percentage > 70) return <WarningIcon color="warning" sx={{ fontSize: '1.5rem' }} />;
+    return <InfoIcon color="info" sx={{ fontSize: '1.5rem' }} />;
   };
 
   return (
@@ -51,7 +51,8 @@ const TokenUsageCircle: React.FC<TokenUsageCircleProps> = ({
       height: size,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      mx: 'auto'
     }}>
       {/* Círculo de fundo */}
       <CircularProgress
@@ -83,17 +84,32 @@ const TokenUsageCircle: React.FC<TokenUsageCircleProps> = ({
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        width: '100%', // Garante que o conteúdo ocupe toda a largura
+        px: 2 // Adiciona um pequeno padding lateral
       }}>
         {percentage > 70 && (
           <Box sx={{ mb: 1 }}>
             {getAlertIcon()}
           </Box>
         )}
-        <Typography variant="h4" fontWeight="bold">
+        <Typography 
+          variant="h4" 
+          fontWeight="bold"
+          sx={{
+            fontSize: { xs: '1.5rem', sm: '2rem' }, // Tamanho responsivo
+            lineHeight: 1.2
+          }}
+        >
           {percentage}%
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography 
+          variant="body2" 
+          color="text.secondary"
+          sx={{
+            fontSize: { xs: '0.75rem', sm: '0.875rem' } // Tamanho responsivo
+          }}
+        >
           Limite
         </Typography>
       </Box>

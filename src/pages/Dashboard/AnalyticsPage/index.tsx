@@ -114,12 +114,15 @@ const AnalyticsPage: React.FC = () => {
   // Adicione esta função ao seu serviço API
   const downloadAnalyticsReport = async (token: string, companyId: number) => {
     try {
-      const blob = await getReportApi(token, companyId); // já retorna o blob diretamente
+      const response = await getReportApi(token, companyId);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
 
-      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      const filename = response.headers['x-filename'] || `relatorio_analytics_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `relatorio_analytics_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -129,6 +132,7 @@ const AnalyticsPage: React.FC = () => {
       throw error;
     }
   };
+
 
 
   // Atualize a função handleDownloadRelatorio na sua página
