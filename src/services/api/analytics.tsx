@@ -1,6 +1,5 @@
 import { api } from ".";
 
-
 // Novas rotas de estatísticas
 export const getUserStatsApi = async (token: string) => {
     try {
@@ -22,4 +21,16 @@ export const getCompanyStatsApi = async (token: string) => {
     } catch (error) {
         throw error;
     }
+};
+
+export const getReportApi = async (token: string, companyId: number) => {
+  try {
+    const response = await api.get(`/analytics/report/${companyId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: 'blob', // ESSENCIAL AQUI
+    });
+    return response.data; // isso agora é um Blob
+  } catch (error) {
+    throw error;
+  }
 };

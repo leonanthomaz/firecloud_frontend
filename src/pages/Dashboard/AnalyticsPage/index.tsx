@@ -25,6 +25,8 @@ import { AssistantInfo, ChatbotStatus } from '../../../types/assistant';
 import { getInteractionsByCompany } from '../../../services/api/interaction';
 import { getAssistantByCompany } from '../../../services/api/assistant';
 import { useCompany } from '../../../contexts/CompanyContext';
+import { getReportApi } from '../../../services/api/analytics';
+import { useSnackbar } from 'notistack';
 
 const AnalyticsPage: React.FC = () => {
   const theme = useTheme();
@@ -36,6 +38,11 @@ const AnalyticsPage: React.FC = () => {
   const { companyData } = useCompany();
   const company = companyData || state.data?.company;
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
+  const { enqueueSnackbar } = useSnackbar();
+  
+  console.log("company", company)
+  console.log("assistant", assistant)
+  console.log("interactions", interactions)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,8 +111,37 @@ const AnalyticsPage: React.FC = () => {
 
   const metrics = calculateMetrics();
 
-  const handleDownloadRelatorio = () => {
-    alert('Relatório baixado com sucesso!');
+  // Adicione esta função ao seu serviço API
+  const downloadAnalyticsReport = async (token: string, companyId: number) => {
+    try {
+      const blob = await getReportApi(token, companyId); // já retorna o blob diretamente
+
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `relatorio_analytics_${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erro ao baixar relatório:', error);
+      throw error;
+    }
+  };
+
+
+  // Atualize a função handleDownloadRelatorio na sua página
+  const handleDownloadRelatorio = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        await downloadAnalyticsReport(token, company?.id ?? 0);
+      }
+    } catch (error) {
+      console.error('Erro ao baixar relatório:', error);
+      enqueueSnackbar('Erro ao carregar dados da assistente', { variant: 'error' });
+    }
   };
 
   if (loading) {
