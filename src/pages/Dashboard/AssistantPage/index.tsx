@@ -18,13 +18,13 @@ import {
   FormControl,
   CircularProgress,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Paper,
+  Chip
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import Layout from '../../../components/Layout';
 import { AssistantInfo } from '../../../types/assistant';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -33,25 +33,22 @@ import { getAssistantByCompany, updateAssistantApi, updateAssistantStatusApi } f
 import { useCompany } from '../../../contexts/CompanyContext';
 import { useGlobal } from '../../../contexts/GlobalContext';
 import { TokenUsageSection } from './TokenUsage';
-// import { FireCreditSection } from './TokenUsage';
 
-// Tipos de assistente disponíveis
 const ASSISTANT_TYPES = [
-  { value: 'receptionist', label: 'Recepcionista' },
-  { value: 'sales_assistant', label: 'Assistente de Vendas' },
-  { value: 'support_assistant', label: 'Assistente de Suporte' },
-  { value: 'booking_agent', label: 'Agente de Agendamentos' },
-  { value: 'hr_assistant', label: 'Assistente de RH' }
+  { value: 'receptionist', label: 'Recepcionista', available: true },
+  { value: 'sales_assistant', label: 'Assistente de Vendas', available: false },
+  { value: 'support_assistant', label: 'Assistente de Suporte', available: false },
+  { value: 'booking_agent', label: 'Agente de Agendamentos', available: false },
+  { value: 'hr_assistant', label: 'Assistente de RH', available: false }
 ];
 
 const AssistantPage: React.FC = () => {
   const { getToken, state } = useAuth();
   const { companyData: currentCompany } = useCompany()
-  const{ isLoading, setLoading } = useGlobal();
+  const { isLoading, setLoading } = useGlobal();
   const { enqueueSnackbar } = useSnackbar();
   const [assistant, setAssistant] = useState<AssistantInfo | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [formData, setFormData] = useState({
     assistant_name: '',
     assistant_api_key: '',
@@ -96,13 +93,6 @@ const AssistantPage: React.FC = () => {
     }
   };
 
-  const handleCopyApiKey = () => {
-    if (formData.assistant_api_key) {
-      navigator.clipboard.writeText(formData.assistant_api_key);
-      enqueueSnackbar('Chave API copiada!', { variant: 'success' });
-    }
-  };
-
   const handleOpenAssistant = () => {
     if (assistant?.assistant_link) {
       window.open(assistant.assistant_link, '_blank');
@@ -125,17 +115,6 @@ const AssistantPage: React.FC = () => {
     }));
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      status: e.target.checked ? 'active' : 'inactive'
-    }));
-  };
-
-  const toggleShowApiKey = () => {
-    setShowApiKey(!showApiKey);
-  };
-
   const handleSave = async () => {
     if (!currentCompany?.id || !token || !assistant?.id) return;
 
@@ -154,12 +133,24 @@ const AssistantPage: React.FC = () => {
       );
       setAssistant(updatedAssistant);
       setIsEditing(false);
-      setShowApiKey(false);
       enqueueSnackbar('Configurações atualizadas com sucesso!', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar('Erro ao atualizar assistente', { variant: 'error' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const toggleAssistantStatus = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStatus = e.target.checked ? 'ONLINE' : 'OFFLINE';
+    if (!token || !company?.id || !assistant?.id) return;
+
+    try {
+      const updated = await updateAssistantStatusApi(token, company.id, assistant.id, newStatus);
+      setAssistant(updated);
+      enqueueSnackbar(`Assistente ${newStatus === 'ONLINE' ? 'ativada' : 'desativada'} com sucesso!`, { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Erro ao alterar status da assistente.', { variant: 'error' });
     }
   };
 
@@ -189,64 +180,60 @@ const AssistantPage: React.FC = () => {
   return (
     <Layout withSidebar={true}>
       <Box>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant={isMobile ? "h5" : "h4"} sx={{ mt: 8, mb: 3, color: 'primary.main', fontWeight: 'bold' }}>
-              Configurações da Assistente
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              Personalize o comportamento e as configurações da sua assistente virtual.
-            </Typography>
-          </Box>
-          <Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={assistant?.status === 'ONLINE'}
-                  onChange={async (e) => {
-                    const newStatus = e.target.checked ? 'ONLINE' : 'OFFLINE';
-                    if (!token || !company?.id || !assistant?.id) return;
-
-                    try {
-                      const updated = await updateAssistantStatusApi(token, company.id, assistant.id, newStatus);
-                      setAssistant(updated);
-                      enqueueSnackbar(`Assistente ${newStatus === 'ONLINE' ? 'ativada' : 'desativada'} com sucesso!`, { variant: 'success' });
-                    } catch (error) {
-                      enqueueSnackbar('Erro ao alterar status da assistente.', { variant: 'error' });
-                    }
-                  }}
-                  color="primary"
+        {/* Header com status destacado */}
+        <Paper elevation={0} sx={{ 
+          mt: 8, 
+          mb: 5,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: 2
+        }}>
+          <Stack direction={isMobile ? "column" : "row"} justifyContent="space-between" alignItems="center" spacing={2}>
+            <Box>
+              <Typography variant={isMobile ? "h5" : "h4"} sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                Configurações da Assistente
+              </Typography>
+              <Typography variant="body1" sx={{ mt: 1 }}>
+                Personalize o comportamento e as configurações da sua assistente virtual.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Chip 
+                label={assistant?.status === 'ONLINE' ? 'Online' : 'Offline'} 
+                color={assistant?.status === 'ONLINE' ? 'success' : 'default'}
+                icon={<PowerSettingsNewIcon fontSize="small" />}
+                variant="outlined"
+              />
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={assistant?.status === 'ONLINE'}
+                      onChange={toggleAssistantStatus}
+                      color="primary"
+                      size="medium"
+                    />
+                  }
+                  label={
+                    <Typography variant="body2" color="textSecondary">
+                      {assistant?.status === 'ONLINE' ? 'Desativar assistente' : 'Ativar assistente'}
+                    </Typography>
+                  }
+                  labelPlacement="start"
                 />
-              }
-              label={assistant?.status === 'ONLINE' ? 'Online' : 'Offline'}
-            />
-          </Box>
-        </Stack>
+              </Box>
+            </Box>
+          </Stack>
+        </Paper>
 
-        {/* <FireCreditSection assistant={assistant} /> */}
         <TokenUsageSection assistant={assistant} />
 
-        {/* Seção Status e Link */}
-        <Card sx={{ mb: 3 }}>
+        {/* Seção Link */}
+        <Card sx={{ mb: 3, borderRadius: 2 }}>
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6">Status da Assistente</Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.status === 'active'}
-                    onChange={handleStatusChange}
-                    color="primary"
-                    disabled={!isEditing}
-                  />
-                }
-                label={formData.status === 'active' ? 'Ativa' : 'Inativa'}
-              />
-            </Stack>
-
             {assistant.assistant_link && (
               <Stack spacing={2}>
-                <Typography variant="h6">Link da Assistente</Typography>
+                <Typography variant="h6" sx={{ mb: 1 }}>Link da Assistente</Typography>
                 <TextField
                   value={assistant.assistant_link}
                   variant="outlined"
@@ -255,19 +242,30 @@ const AssistantPage: React.FC = () => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={handleCopyLink}>
+                        <IconButton onClick={handleCopyLink} color="primary">
                           <ContentCopyIcon />
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: theme.palette.background.default
+                    }
+                  }}
                 />
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   startIcon={<OpenInNewIcon />}
                   onClick={handleOpenAssistant}
-                  sx={{ alignSelf: 'flex-start' }}
+                  sx={{ 
+                    alignSelf: 'flex-start',
+                    borderRadius: 1,
+                    textTransform: 'none',
+                    px: 3,
+                    py: 1
+                  }}
                 >
                   Acessar Assistente
                 </Button>
@@ -277,17 +275,17 @@ const AssistantPage: React.FC = () => {
         </Card>
 
         {/* Seção Configurações Editáveis */}
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: 3, borderRadius: 2 }}>
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-              <Typography variant="h6">Configurações Personalizadas</Typography>
+              <Typography variant="h6">{isMobile ? "Configurações" : "Configurações Personalizadas"}</Typography>
               {isEditing ? (
                 <Box>
                   <Button 
                     variant="outlined" 
-                    color="secondary" 
+                    color="inherit" 
                     onClick={() => setIsEditing(false)}
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 2, borderRadius: 1 }}
                   >
                     Cancelar
                   </Button>
@@ -296,8 +294,9 @@ const AssistantPage: React.FC = () => {
                     color="primary" 
                     onClick={handleSave}
                     disabled={saving}
+                    sx={{ borderRadius: 1 }}
                   >
-                    {saving ? <CircularProgress size={24} /> : 'Salvar'}
+                    {saving ? <CircularProgress size={24} /> : 'Salvar Alterações'}
                   </Button>
                 </Box>
               ) : (
@@ -305,8 +304,14 @@ const AssistantPage: React.FC = () => {
                   variant="outlined" 
                   color="primary" 
                   onClick={() => setIsEditing(true)}
+                  sx={{
+                      minWidth: isMobile ? '30%' : 180,
+                      py: isMobile ? 0.5 : 1.5,
+                      fontSize: '0.875rem',
+                      ...(isMobile && { mt: 1 })
+                  }}
                 >
-                  Editar
+                  {isMobile ? "Editar" : "Editar Configurações"}
                 </Button>
               )}
             </Box>
@@ -320,9 +325,11 @@ const AssistantPage: React.FC = () => {
                 fullWidth
                 disabled={!isEditing}
                 helperText="Escolha um nome para identificar sua assistente"
+                variant="outlined"
+                size="small"
               />
 
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <InputLabel id="assistant-type-label">Tipo de Assistente</InputLabel>
                 <Select
                   labelId="assistant-type-label"
@@ -334,46 +341,21 @@ const AssistantPage: React.FC = () => {
                   disabled={!isEditing}
                 >
                   {ASSISTANT_TYPES.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
+                    <MenuItem 
+                      key={type.value} 
+                      value={type.value} 
+                      disabled={!type.available}
+                    >
+                      {type.label} {!type.available && (
+                        <Chip label="Em breve" size="small" sx={{ ml: 1 }} />
+                      )}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
               
-              <TextField
-                label="Chave da API"
-                name="assistant_api_key"
-                type={showApiKey ? 'text' : 'password'}
-                value={formData.assistant_api_key}
-                onChange={handleInputChange}
-                fullWidth
-                disabled={!isEditing}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <VpnKeyIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {isEditing ? (
-                        <IconButton onClick={toggleShowApiKey}>
-                          {showApiKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      ) : (
-                        <IconButton onClick={handleCopyApiKey}>
-                          <ContentCopyIcon />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-                helperText={isEditing ? "Cole aqui a chave da API do seu provedor de IA" : undefined}
-              />
-
               {isEditing && (
-                <Alert severity="info">
+                <Alert severity="info" sx={{ borderRadius: 1 }}>
                   Configure o tipo de assistente de acordo com a função que ela irá desempenhar.
                   Isso influenciará no comportamento e respostas do seu chatbot.
                 </Alert>
@@ -382,20 +364,26 @@ const AssistantPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Seção Informações da API (somente leitura) */}
-        <Card sx={{ mb: 3 }}>
+        {/* Seção Informações da API */}
+        <Card sx={{ mb: 3, borderRadius: 2 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom>
               Informações Técnicas
             </Typography>
             
-            <Stack spacing={3}>
+            <Stack spacing={2} mt={3}>
               <TextField
                 label="URL da API"
                 value={assistant.assistant_api_url || 'Não configurado'}
                 variant="outlined"
                 fullWidth
                 disabled
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: theme.palette.background.default,
+                  }
+                }}
               />
               
               <TextField
@@ -404,11 +392,16 @@ const AssistantPage: React.FC = () => {
                 variant="outlined"
                 fullWidth
                 disabled
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: theme.palette.background.default
+                  }
+                }}
               />
             </Stack>
           </CardContent>
         </Card>
-
       </Box>
     </Layout>
   );

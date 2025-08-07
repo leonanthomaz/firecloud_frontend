@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Button, Switch, FormControlLabel, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Card, CardContent, Switch, FormControlLabel, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, useTheme, useMediaQuery } from '@mui/material';
 import Layout from '../../../components/Layout';
 import { CompanyOpen } from '../../../types/company';
 import { changeCompanyStatusApi } from '../../../services/api/company';
@@ -25,7 +25,6 @@ const SettingPage: React.FC = () => {
     }, [company]);
     
     const handleAssistantToggle = () => setIsAssistantEnabled(!isAssistantEnabled);
-    const handleSave = () => "";
 
     // Alterna status da loja
     const handleCompanyStatusChange = async (event: SelectChangeEvent) => {
@@ -94,31 +93,41 @@ const SettingPage: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Seção Preferências de Atendimento */}
-                <Card sx={{ mb: 3 }}>
+                {/* Seção Preferências de Atendimento - Em breve */}
+                <Card sx={{ mb: 3, opacity: 0.5, pointerEvents: 'none' }}>
                     <CardContent>
                         <Typography variant="h5" gutterBottom>
                             Preferências de Atendimento
                         </Typography>
+
                         <FormControlLabel
-                            control={<Switch checked={isWhatsAppEnabled} onChange={() => setIsWhatsAppEnabled(!isWhatsAppEnabled)} color="primary" />}
+                            control={
+                                <Switch
+                                checked={isWhatsAppEnabled}
+                                onChange={() => setIsWhatsAppEnabled(!isWhatsAppEnabled)}
+                                color="primary"
+                                disabled
+                                />
+                            }
                             label="Integração com WhatsApp"
                         />
                         <FormControlLabel
-                            control={<Switch checked={isGoogleCalendarEnabled} onChange={() => setIsGoogleCalendarEnabled(!isGoogleCalendarEnabled)} color="primary" />}
+                            control={
+                                <Switch
+                                checked={isGoogleCalendarEnabled}
+                                onChange={() => setIsGoogleCalendarEnabled(!isGoogleCalendarEnabled)}
+                                color="primary"
+                                disabled
+                                />
+                            }
                             label="Integração com Google Agenda"
                         />
+
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                            ⚠️ Funcionalidade disponível em breve.
+                        </Typography>
                     </CardContent>
                 </Card>
-
-                {/* Botões de Ação */}
-                <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSave}>
-                    Salvar Configurações
-                </Button>
-                <Button variant="outlined" color="secondary" sx={{ mt: 2, ml: 2 }}>
-                    Resetar Configurações
-                </Button>
-
             </Box>
         </Layout>
     );
