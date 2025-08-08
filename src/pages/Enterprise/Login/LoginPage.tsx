@@ -58,6 +58,13 @@ const LoginPage: React.FC = () => {
         }
     };
 
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleLogin();
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -178,6 +185,7 @@ const LoginPage: React.FC = () => {
                                 fullWidth
                                 value={username}
                                 onChange={handleInputChange(setUsername)}
+                                onKeyDown={handleKeyPress}
                                 disabled={isLoading}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
@@ -193,6 +201,7 @@ const LoginPage: React.FC = () => {
                                 fullWidth
                                 value={password}
                                 onChange={handleInputChange(setPassword)}
+                                onKeyDown={handleKeyPress}
                                 disabled={isLoading}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {

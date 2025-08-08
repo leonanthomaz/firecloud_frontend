@@ -23,9 +23,9 @@ const MainContent = styled(Box, {
 })<{ withSidebar?: boolean }>(({ theme, withSidebar }) => ({
   flexGrow: 1,
   padding: theme.spacing(2),
-  marginLeft: withSidebar ? '50px' : 0,
+  marginLeft: withSidebar ? '20px' : 0,
   marginTop: theme.spacing(2),
-  width: withSidebar ? `calc(100% - 50px)` : '100%',
+  width: withSidebar ? `calc(100% - 20px)` : '100%',
   transition: theme.transitions.create(['margin', 'padding'], {
     duration: theme.transitions.duration.standard,
   }),
