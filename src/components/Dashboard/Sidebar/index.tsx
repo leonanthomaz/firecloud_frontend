@@ -141,8 +141,8 @@ const menuItems = [
     { text: 'Painel', to: '/painel', icon: <DashboardIcon />, id: "sidebar-dashboard" },
     
     // Parte operacional mais usada
-    { text: 'Agendamentos', to: '/painel/agendamentos', icon: <EventIcon />, id: "sidebar-schedules" },
     { text: 'Marcações', to: '/painel/horarios-disponiveis', icon: <ScheduleIcon />, id: "sidebar-schedules_slots" },
+    { text: 'Agendamentos', to: '/painel/agendamentos', icon: <EventIcon />, id: "sidebar-schedules" },
     { text: 'Serviços', to: '/painel/servicos', icon: <BuildIcon />, id: "sidebar-services" },
     { text: 'Produtos', to: '/painel/produtos', icon: <ShoppingCartIcon />, id: "sidebar-products" },
 
